@@ -2,6 +2,8 @@ package com.livenow.howtotestapplicationonlinelecture;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 
@@ -11,6 +13,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class StudyTest {
+
+    private Logger logger = LoggerFactory.getLogger(StudyTest.class);
 
     @BeforeAll
     static void beforeAll() {
@@ -144,5 +148,28 @@ class StudyTest {
         final String test_env = System.getenv("TEST_ENV");
         System.out.println("test_env = " + test_env);
         //when
+    }
+
+    @Test
+    @DisplayName("스터디 만들기 fast")
+    @FastTest
+    void create_new_study_tagging() {
+        //given
+        logger.info("fast Test");
+        final Study actual = new Study(10);
+        //when
+        //then
+        assertThat(actual.getLimit()).isGreaterThan(0);
+    }
+
+    @Test
+    @DisplayName("스터디 만들기 slow")
+    @Tag("slow")
+    void create_new_study_tagging2() {
+        //given
+        final Study actual = new Study(10);
+        //when
+        //then
+        assertThat(actual.getLimit()).isGreaterThan(0);
     }
 }
