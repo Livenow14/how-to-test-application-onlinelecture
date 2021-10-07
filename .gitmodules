@@ -1,0 +1,3 @@
+[submodule "inflearn-the-java-test"]
+	path = inflearn-the-java-test
+	url = https://github.com/keesun/inflearn-the-java-test.git
