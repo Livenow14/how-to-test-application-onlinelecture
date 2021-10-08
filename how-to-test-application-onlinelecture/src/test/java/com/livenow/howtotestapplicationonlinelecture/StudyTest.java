@@ -2,6 +2,8 @@ package com.livenow.howtotestapplicationonlinelecture;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -117,8 +119,8 @@ class StudyTest {
 
     @Test
     @EnabledOnOs({OS.MAC, OS.LINUX})
-    @EnabledOnJre({JRE.JAVA_8, JRE.JAVA_9, JRE.JAVA_10, JRE.JAVA_11 })
-    //@EnabledIfEnvironmentVariable(named = "TEST_ENV", matches = "LOCAL")
+    @EnabledOnJre({JRE.JAVA_8, JRE.JAVA_9, JRE.JAVA_10, JRE.JAVA_11})
+        //@EnabledIfEnvironmentVariable(named = "TEST_ENV", matches = "LOCAL")
     void create_test_with_condition() {
         //given
         final String test_env = System.getenv("TEST_ENV");
@@ -172,4 +174,20 @@ class StudyTest {
         //then
         assertThat(actual.getLimit()).isGreaterThan(0);
     }
+
+    @DisplayName("반복적 스터디 만들기")
+    @RepeatedTest(value = 10, name = "{displayName}, {currentRepetition}/{totalRepetitions}") //DisplayName이 동작하지 않음. name 지정을 안해도 나름 가독성 있음
+    void repeatTest(RepetitionInfo repetitionInfo) {
+        logger.info("test " + repetitionInfo.getCurrentRepetition() + "/" + repetitionInfo.getTotalRepetitions());
+    }
+
+
+    @DisplayName("스터디 만들기")
+    @ParameterizedTest(name = "{index} {displayName} message={0}")
+    @ValueSource(strings = {"추워", "지는", "날씨"})
+    void parameterizedTest(String message) {
+        logger.info(message);
+    }
+
 }
+
