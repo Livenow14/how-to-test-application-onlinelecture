@@ -2,7 +2,17 @@ package com.livenow.howtotestapplicationonlinelecture;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.*;
+import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.aggregator.AggregateWith;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import org.junit.jupiter.params.aggregator.ArgumentsAggregationException;
+import org.junit.jupiter.params.aggregator.ArgumentsAggregator;
+import org.junit.jupiter.params.converter.ArgumentConversionException;
+import org.junit.jupiter.params.converter.ConvertWith;
+import org.junit.jupiter.params.converter.SimpleArgumentConverter;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -176,7 +186,8 @@ class StudyTest {
     }
 
     @DisplayName("반복적 스터디 만들기")
-    @RepeatedTest(value = 10, name = "{displayName}, {currentRepetition}/{totalRepetitions}") //DisplayName이 동작하지 않음. name 지정을 안해도 나름 가독성 있음
+    @RepeatedTest(value = 10, name = "{displayName}, {currentRepetition}/{totalRepetitions}")
+        //DisplayName이 동작하지 않음. name 지정을 안해도 나름 가독성 있음
     void repeatTest(RepetitionInfo repetitionInfo) {
         logger.info("test " + repetitionInfo.getCurrentRepetition() + "/" + repetitionInfo.getTotalRepetitions());
     }
@@ -185,9 +196,65 @@ class StudyTest {
     @DisplayName("스터디 만들기")
     @ParameterizedTest(name = "{index} {displayName} message={0}")
     @ValueSource(strings = {"추워", "지는", "날씨"})
+    @NullAndEmptySource
     void parameterizedTest(String message) {
         logger.info(message);
     }
 
+    /**
+     * 인자를 하나만 받을떄
+     */
+    @DisplayName("컨버터와 함꼐 스터디 만들기")
+    @ParameterizedTest(name = "{index} {displayName} message={0}")
+    @ValueSource(ints = {10, 20, 40})
+    void parameterizedTestWithSimpleArgumentConverter(@ConvertWith(StudyConverter.class) Study study) {
+        System.out.println(study.getLimit());
+    }
+
+    @DisplayName("컨버터와 함꼐 스터디 만들기 - Csv")
+    @ParameterizedTest(name = "{index} {displayName} message={0}, {1}")
+    @CsvSource(value = {"10, '자바 스터디'", "20, '스프링'"}, delimiter = ',')
+    void parameterizedTestWithCvs(Integer limit, String name) {
+        System.out.println(new Study(limit, name));
+    }
+
+    @DisplayName("컨버터와 함꼐 스터디 만들기 - Csv with Accessor")
+    @ParameterizedTest(name = "{index} {displayName} message={0} {1}")
+    @CsvSource(value = {"10, '자바 스터디'", "20, '스프링'"}, delimiter = ',')
+    void parameterizedTestWithCvsAccessor(ArgumentsAccessor argumentsAccessor) {
+        System.out.println(new Study(argumentsAccessor.getInteger(0), argumentsAccessor.getString(1)));
+    }
+
+    @DisplayName("컨버터와 함꼐 스터디 만들기 - Csv with Aggregator")
+    @ParameterizedTest(name = "{index} {displayName} message={0}, {1}")
+    @CsvSource(value = {"10, '자바 스터디'", "20, '스프링'"}, delimiter = ',')
+    void parameterizedTestWithCvsAggregator(@AggregateWith(StudyAggregator.class) Study study) {
+        System.out.println(study);
+    }
+
+    /**
+     * 인자를 하나만 받을떄
+     */
+    static class StudyConverter extends SimpleArgumentConverter {
+
+        @Override
+        protected Object convert(Object source, Class<?> targetType) throws ArgumentConversionException {
+            assertThat(targetType).isEqualTo(Study.class);
+            assertEquals(Study.class, targetType, "Can only conver to Study");
+            return new Study(Integer.parseInt(source.toString()));
+        }
+    }
+
+    /**
+     * 인자를 여러개 받을때
+     * static inner class이거나, public class일경우만 사용
+     */
+    static class StudyAggregator implements ArgumentsAggregator {
+
+        @Override
+        public Object aggregateArguments(ArgumentsAccessor accessor, ParameterContext context) throws ArgumentsAggregationException {
+            return new Study(accessor.getInteger(0), accessor.getString(1));
+        }
+    }
 }
 
