@@ -28,10 +28,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * - 경우에 따라, 테스트 간에 공유하는 모든 상태를 @BeforeEach 또는 @AfterEach에서 초기화 할 필요가 있다.
  * - @BeforeAll과 @AfterAll을 인스턴스 메소드 또는 인터페이스에 정의한 default 메소드로 정의할 수도 있다.
  * @BeforeAll과 @AfterAll이 static을 붙이지 않아도 됨
- * 
+ *
  */
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+//@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class StudyTest {
 
     private Logger logger = LoggerFactory.getLogger(StudyTest.class);
@@ -65,6 +66,7 @@ class StudyTest {
      */
     int value = 1;
 
+    @Order(1)
     @Test
     @DisplayName("스터디 만들기")
     void create_new_study() {
@@ -88,6 +90,7 @@ class StudyTest {
         assertThat(study).isNotNull();
     }
 
+    @Order(2)
     @Test
     void create_test() {
         //given
@@ -115,6 +118,7 @@ class StudyTest {
         );
     }
 
+    @Order(3)
     @Test
     void create_test_with_unchecked_exception() {
         //given
