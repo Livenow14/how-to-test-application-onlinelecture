@@ -2,7 +2,9 @@ package com.livenow.howtotestapplicationonlinelecture;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ParameterContext;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.aggregator.AggregateWith;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
@@ -27,15 +29,34 @@ import static org.junit.jupiter.api.Assertions.*;
  * - 테스트 클래스당 인스턴스를 하나만 만들어 사용한다.
  * - 경우에 따라, 테스트 간에 공유하는 모든 상태를 @BeforeEach 또는 @AfterEach에서 초기화 할 필요가 있다.
  * - @BeforeAll과 @AfterAll을 인스턴스 메소드 또는 인터페이스에 정의한 default 메소드로 정의할 수도 있다.
- * @BeforeAll과 @AfterAll이 static을 붙이지 않아도 됨
  *
+ * @BeforeAll과 @AfterAll이 static을 붙이지 않아도 됨
  */
 //@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 //@DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
+
+/**
+ * 선언적 방법
+ */
+//@ExtendWith(FindSlowTestExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class StudyTest {
 
+    /**
+     * JUnit은 테스트 메소드 마다 테스트 인스턴스를 새로 만든다.
+     - 이것이 기본 전략.
+     - 테스트 메소드를 독립적으로 실행하여 예상치 못한 부작용을 방지하기 위함이다.
+     - 이 전략을 JUnit 5에서 변경할 수 있다.
+     * value 는 항상 1임
+     */
+    int value = 1;
     private Logger logger = LoggerFactory.getLogger(StudyTest.class);
+
+    /**
+     * 프로그래밍 등록
+     */
+    @RegisterExtension
+    static FindSlowTestExtension findSlowTestExtension = new FindSlowTestExtension(1000L);
 
     @BeforeAll
     static void beforeAll() {
@@ -57,20 +78,13 @@ class StudyTest {
         System.out.println("after each - 테스트 이후 매번 실행");
     }
 
-    /**
-     * JUnit은 테스트 메소드 마다 테스트 인스턴스를 새로 만든다.
-     - 이것이 기본 전략.
-     - 테스트 메소드를 독립적으로 실행하여 예상치 못한 부작용을 방지하기 위함이다.
-     - 이 전략을 JUnit 5에서 변경할 수 있다.
-     * value 는 항상 1임
-     */
-    int value = 1;
-
     @Order(1)
     @Test
     @DisplayName("스터디 만들기")
-    void create_new_study() {
+    void create_new_study() throws InterruptedException {
         //given
+        Thread.sleep(1000);
+
         final Study study = new Study(value++);
         //when
         //then
