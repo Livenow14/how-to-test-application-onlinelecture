@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  */
 //@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
+//@DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class StudyTest {
 
