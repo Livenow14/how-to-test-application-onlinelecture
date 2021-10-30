@@ -3,6 +3,7 @@ package com.livenow.inflearnthejavatest.study;
 import com.livenow.inflearnthejavatest.domain.Member;
 import com.livenow.inflearnthejavatest.domain.Study;
 import com.livenow.inflearnthejavatest.member.MemberService;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatcher;
@@ -13,9 +14,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.BDDMockito.willReturn;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -114,5 +114,27 @@ class StudyServiceTest {
          * 더이상 추가적인 액션을 원하지 않는다면
          */
         //verifyNoInteractions(memberService);
+    }
+
+    @DisplayName("")
+    @Test
+    void createStudyService5(@Mock MemberService memberService,
+                             @Mock StudyRepository studyRepository) {
+        //given
+        final StudyService studyService = new StudyService(memberService, studyRepository);
+        final Study study = new Study(10, "테스트");
+        study.setOwnerId(1L);
+        final Member member = new Member();
+        member.setId(1L);
+        member.setEmail("keesun@email.com");
+
+        given(memberService.findById(1L)).willReturn(Optional.of(member));
+        given(studyRepository.save(study)).willReturn(study);
+        //when
+        final Study newStudy = studyService.createNewStudy(1L, study);
+        //then
+        assertThat(newStudy.getOwnerId()).isNotNull();
+        then(memberService).should(times(1)).notify(study);
+        //then(memberService).shouldHaveNoMoreInteractions();
     }
 }
