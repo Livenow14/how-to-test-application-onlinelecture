@@ -6,6 +6,7 @@ import com.livenow.inflearnthejavatest.member.MemberService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatcher;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -82,5 +83,36 @@ class StudyServiceTest {
         //then
         assertThat(savedStudy.getOwnerId()).isNotNull();
         assertThat(foundMember.getId()).isEqualTo(savedStudy.getOwnerId());
+    }
+
+    @Test
+    void createStudyService4(@Mock MemberService memberService,
+                             @Mock StudyRepository studyRepository) {
+        //given
+        final StudyService studyService = new StudyService(memberService, studyRepository);
+        final Study study = new Study(10, "테스트");
+        study.setOwnerId(1L);
+        final Member member = new Member();
+        member.setId(1L);
+        member.setEmail("keesun@email.com");
+        //when
+        willReturn(Optional.of(member)).given(memberService).findById(1L);
+        willReturn(study).given(studyRepository).save(study);
+        studyService.createNewStudy(1L, study);
+        //then
+        verify(memberService, times(1)).notify(study);
+        verify(memberService, times(1)).notify(member);
+
+        /**
+         * 순서를 보장받고 싶을 때
+         */
+        final InOrder inOrder = inOrder(memberService);
+        inOrder.verify(memberService).notify(study);
+        inOrder.verify(memberService).notify(member);
+
+        /**
+         * 더이상 추가적인 액션을 원하지 않는다면
+         */
+        //verifyNoInteractions(memberService);
     }
 }
